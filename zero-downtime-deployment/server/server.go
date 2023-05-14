@@ -31,6 +31,7 @@ func main() {
 	handlers := mux.NewRouter()
 	handlers.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		io.WriteString(res, "Make it Happen\n")
+		io.WriteString(res, "Make it Better\n")
 		// io.WriteString(res, "Make it Better\n")
 	})
 
@@ -42,5 +43,9 @@ func main() {
 
 	log.Println("initiate server finished")
 
-	zero_interruption.ServeHTTP("8000", srv)
+	err := zero_interruption.ServeHTTP("8000", srv)
+
+	if err != nil {
+		log.Println("[Main] error while serving http, err: ", err)
+	}
 }
