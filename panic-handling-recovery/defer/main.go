@@ -8,8 +8,11 @@ func doDefer() {
 
 	// TODO: print One, Two, Three, Four, Five sequentially using defer
 
-	fmt.Println("One")
-	fmt.Println("Two")
+	defer fmt.Println("Five")
+	defer fmt.Println("Four")
+	defer fmt.Println("Three")
+	defer fmt.Println("Two")
+	defer fmt.Println("One")
 }
 
 func main() {

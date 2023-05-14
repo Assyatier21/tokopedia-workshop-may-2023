@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -20,7 +23,7 @@ var (
 
 func main() {
 	// Let us see HTTP serve without graceful shutdown
-	doServeHTTP()
+	doServeHTTPGraceful()
 
 	// Now let us implement graceful shutdown.
 	// Can delete doServeHTTP to make playground simpler
@@ -40,16 +43,19 @@ func doServeHTTP() {
 
 func doServeHTTPGraceful() {
 	// TODO: create context and its cancel function
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// TODO: setup SIGTERM listener
 	go func() {
 		// Listen for the termination signal
+		stop := make(chan os.Signal, 1) // we need to reserve to buffer size 1, so the notifier are not blocked
+		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 		// Block until termination signal received
+		<-stop
 
-		// Essentially the cancel() is broadcasted to all the goroutines that call .Done()
-		// The returned context's Done channel is closed when the returned cancel function is called
+		// Block until termination signal received
+		cancel()
 	}()
 
 	// setup errgroup with context so we can listen to its cancellation
@@ -66,6 +72,9 @@ func doServeHTTPGraceful() {
 	// TODO: setup HTTP graceful shutdown
 	eg.Go(func() error {
 		<-egCtx.Done()
+		fmt.Println("Shutting down the system...")
+		httpServer.Shutdown(ctx)
+		fmt.Println("Graceful shutdown finished...")
 		return nil
 	})
 

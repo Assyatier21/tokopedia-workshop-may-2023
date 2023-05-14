@@ -1,29 +1,34 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"runtime/debug"
+)
 
 func firstFunction() {
-	// Defer the process of recovery
-	defer func() {
-		// Recover from panic to stop termination of the application
-
-		// TODO: setup recover function to recover from a panic
-	}()
 	fmt.Println("First function called")
 	secondFunction()
-	fmt.Println("First function finished") // This should not get called
+	fmt.Println("First function finished")
 }
 
 func secondFunction() {
 	fmt.Println("Second function called")
-	panic("Panic happens")                  // Go library for panic
-	fmt.Println("Second function finished") // This should not get called
+	panic("Panic happens")
+	fmt.Println("Second function finished")
 }
 
 func doRecover() {
 	fmt.Println("Panic example in Go")
+	defer func() {
+		// Recover from panic to stop termination of the application
+		if r := recover(); r != nil {
+			fmt.Println("Message: ", r)
+			debug.PrintStack()
+		}
+
+	}()
 	firstFunction()
-	fmt.Println("All process finished") // This should get called
+	fmt.Println("All process finished")
 }
 
 func main() {
